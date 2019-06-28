@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+   <baseDirectory>AutomationPackage</baseDirectory>
+   <formats>
+      <format>zip</format>
+   </formats>
+   <fileSets>
+      <fileSet>
+         <directory>${project.basedir}/src/test/resources/api-input/json/</directory>
+         <outputDirectory>api-input/json/</outputDirectory>
+         <fileMode>0777</fileMode>
+         <directoryMode>0777</directoryMode>
+         <includes>
+            <include>**/*</include>
+         </includes>
+      </fileSet>
+   
+      <fileSet>
+         <directory>${project.basedir}/src/test/resources/featureFiles</directory>
+         <outputDirectory>featureFiles/</outputDirectory>
+         <fileMode>0777</fileMode>
+         <directoryMode>0777</directoryMode>
+         <includes>
+            <include>**/*</include>
+         </includes>
+      </fileSet>
+      
+      <fileSet>
+         <directory>${project.basedir}/src/test/resources/bin</directory>
+         <outputDirectory>bin/</outputDirectory>
+         <fileMode>0777</fileMode>
+         <directoryMode>0777</directoryMode>
+         <includes>
+            <include>**/*</include>
+         </includes>
+      </fileSet>
+      
+   </fileSets>
+   
+   <files>
+		<file>
+            <source>${project.basedir}/target/Automated-Tests.jar</source>
+            <outputDirectory>lib/</outputDirectory>
+			<fileMode>0777</fileMode>
+        </file>
+		
+		<file>
+            <source>${project.basedir}/src/test/resources/properties/api.properties</source>
+            <outputDirectory>properties/</outputDirectory>
+			<fileMode>0777</fileMode>
+        </file>
+        
+        <file>
+            <source>${project.basedir}/src/test/resources/readme.txt</source>
+            <outputDirectory>/</outputDirectory>
+			<fileMode>0777</fileMode>
+        </file>
+        
+    </files>
+   <includeBaseDirectory>false</includeBaseDirectory>
+</assembly>
