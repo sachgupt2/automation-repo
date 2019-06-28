@@ -1,6 +1,6 @@
 Steps to trigger automation suite:
 
-* Prerequisites
+Prerequisites
     
     + Java1.8 or later version should be installed.
     + Your machine should be Windows.
