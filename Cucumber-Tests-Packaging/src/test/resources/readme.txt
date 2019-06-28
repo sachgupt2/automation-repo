@@ -25,6 +25,3 @@ Steps to trigger automation suite:
 
 6. Open file 'overview-features.html' in browser to view the report.
 
-
-
-
