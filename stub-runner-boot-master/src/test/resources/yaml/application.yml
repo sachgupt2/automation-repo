@@ -1,0 +1,3 @@
+stubrunner:
+  work-offline: true
+  ids: com.baeldung.spring.cloud:spring-cloud-contract-producer:+:stubs:8090

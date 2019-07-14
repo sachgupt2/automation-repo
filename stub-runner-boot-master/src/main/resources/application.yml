@@ -1,0 +1,8 @@
+server.port: ${PORT:8083}
+spring:
+  application:
+    name: stubrunner
+    
+stubrunner:
+  stubs-mode: local
+  ids: com.baeldung.spring.cloud:spring-cloud-contract-producer:+:stubs:8090
