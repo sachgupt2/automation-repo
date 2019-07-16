@@ -43,7 +43,7 @@ public class StubRunnerStepDef
       RestAssured.authentication = authScheme;
 
       // Prepare the API request on above given parameters.
-      RequestSpecification httpRequest = RestAssured.given().queryParam( "clientId", clientId );
+      RequestSpecification httpRequest = RestAssured.given().queryParam( "clientId", clientId ).log().everything();
 
       // Set content type for request.
       httpRequest.contentType( "application/json" );
@@ -103,7 +103,7 @@ public class StubRunnerStepDef
       RestAssured.authentication = authScheme;
 
       // Prepare the API request on above given parameters.
-      RequestSpecification httpRequest = RestAssured.given();
+      RequestSpecification httpRequest = RestAssured.given().log().everything();;
 
       // Set content type for request.
       httpRequest.contentType( "application/json" );
@@ -169,7 +169,7 @@ public class StubRunnerStepDef
       RestAssured.authentication = authScheme;
 
       // Prepare the API request on above given parameters.
-      RequestSpecification httpRequest = RestAssured.given();
+      RequestSpecification httpRequest = RestAssured.given().log().everything();;
 
       // Set content type for request.
       httpRequest.contentType( "application/json" );
@@ -250,7 +250,7 @@ public class StubRunnerStepDef
       RestAssured.authentication = authScheme;
 
       // Prepare the API request on above given parameters.
-      RequestSpecification httpRequest = RestAssured.given();
+      RequestSpecification httpRequest = RestAssured.given().log().everything();;
 
       // Set content type for request.
       httpRequest.contentType( "application/json" );
@@ -325,7 +325,7 @@ public class StubRunnerStepDef
       RestAssured.authentication = authScheme;
 
       // Prepare the API request on above given parameters.
-      RequestSpecification httpRequest = RestAssured.given().queryParam( "id", id );
+      RequestSpecification httpRequest = RestAssured.given().queryParam( "id", id ).log().everything();;
 
       // Set content type for request.
       httpRequest.contentType( "application/json" );
