@@ -5,6 +5,7 @@ properties([
 ])
 
 node {
+ def MAILING_LIST_TEST_RESULTS = "sachin.gupta@toshiba-tsip.com"
  def SPRING_CLOUD_DIR = "SpringloudContract"
  def STUB_RUNNER_DIR = "StubServer"
  def CUCUMBER_AUTOMATION_DIR = "Cucumber"
@@ -113,41 +114,38 @@ stage('BUILD_CUCUMBER_AUTOMATION') {
   }
 
 stage('COPY_ARTEFACTS_TO_TEST_MACHINE') {
- try{ 
-	sleep(time:2,unit:"MINUTES")
-	echo "Deleting old artefacts..."  
-	bat "${TEST_MACHINE_AUTHENTICATION_CMD}"
-	bat "del /s /q \\\\${TEST_MACHINE_IP}\\${TEST_MACHINE_SHARED_DIR}\\*.*"
-	bat "rmdir /s /q \\\\${TEST_MACHINE_IP}\\${TEST_MACHINE_SHARED_DIR}\\jp"
-	bat "rmdir /s /q \\\\${TEST_MACHINE_IP}\\${TEST_MACHINE_SHARED_DIR}\\Automation"
-	bat "rmdir /s /q \\\\${TEST_MACHINE_IP}\\${TEST_MACHINE_SHARED_DIR}\\Stub-Server"
-	}
- catch(e){
-      echo "One or more directory could not be deleted."
-  } 
-  try
-   {
-		//bat "cd C:/Users/admin/.m2/repository && jar -cfM stubs.zip jp"
-		//bat "cd C:/Users/admin/.m2/repository && copy /Y stubs.zip \\\\${TEST_MACHINE_IP}\\${TEST_MACHINE_SHARED_DIR}\\stubs.zip"
-		bat "cd ${LOCAL_MACHINE_MAVEN_REPO_DIR} && xcopy /E /I /Y jp \\\\${TEST_MACHINE_IP}\\${TEST_MACHINE_SHARED_DIR}\\jp"
-    }
-  catch(e)
-   {
-		echo "Copying artefacts failed.."
-		currentBuild.result = "FAILED"
-		throw e
-   } 
-  dir(STUB_RUNNER_DIR)
-     {
-		   echo "Copying file stub-server-releases.zip" 
-           bat "cd stub-runner-boot-master\\target\\package && copy /Y stub-server-releases.zip \\\\${TEST_MACHINE_IP}\\${TEST_MACHINE_SHARED_DIR}\\stub-server-releases.zip"
-	 }
-  
-  dir(CUCUMBER_AUTOMATION_DIR)
-     {
-		   echo "Copying file TestAutomation.zip" 
-           bat "cd Cucumber-Tests-Packaging\\target\\package && copy /Y TestAutomation.zip \\\\${TEST_MACHINE_IP}\\${TEST_MACHINE_SHARED_DIR}\\TestAutomation.zip"
-	 }
+		try{ 
+				sleep(time:2,unit:"MINUTES")
+				echo "Deleting old artefacts..."  
+				bat "${TEST_MACHINE_AUTHENTICATION_CMD}"
+				bat "del /s /q \\\\${TEST_MACHINE_IP}\\${TEST_MACHINE_SHARED_DIR}\\*.*"
+				bat "rmdir /s /q \\\\${TEST_MACHINE_IP}\\${TEST_MACHINE_SHARED_DIR}\\jp"
+				bat "rmdir /s /q \\\\${TEST_MACHINE_IP}\\${TEST_MACHINE_SHARED_DIR}\\Automation"
+				bat "rmdir /s /q \\\\${TEST_MACHINE_IP}\\${TEST_MACHINE_SHARED_DIR}\\Stub-Server"
+		}
+		catch(e){
+				echo "One or more directory could not be deleted."
+		} 
+		try{
+				bat "cd ${LOCAL_MACHINE_MAVEN_REPO_DIR} && xcopy /E /I /Y jp \\\\${TEST_MACHINE_IP}\\${TEST_MACHINE_SHARED_DIR}\\jp"
+    
+		dir(STUB_RUNNER_DIR)
+			{
+				echo "Copying file stub-server-releases.zip" 
+				bat "cd stub-runner-boot-master\\target\\package && copy /Y stub-server-releases.zip \\\\${TEST_MACHINE_IP}\\${TEST_MACHINE_SHARED_DIR}\\stub-server-releases.zip"
+			}
+		dir(CUCUMBER_AUTOMATION_DIR)
+			{
+				echo "Copying file TestAutomation.zip" 
+				bat "cd Cucumber-Tests-Packaging\\target\\package && copy /Y TestAutomation.zip \\\\${TEST_MACHINE_IP}\\${TEST_MACHINE_SHARED_DIR}\\TestAutomation.zip"
+			}
+		}
+		catch(e){
+			echo "Copying artefacts failed.."
+			currentBuild.result = "FAILED"
+			notifyCopyArtefactFailed()
+			throw e
+		}
   }
   
   stage('DEPLOY_ARTIFACTS_ON_TEST_MACHINE') {
@@ -176,6 +174,7 @@ stage('COPY_ARTEFACTS_TO_TEST_MACHINE') {
    {
       echo "Deployment of artefacts FAILED..."
 	  currentBuild.result = "FAILED"
+	  notifyDeployArtefactFailed()
 	  throw e
    } 
   }
@@ -234,10 +233,20 @@ stage('COPY_ARTEFACTS_TO_TEST_MACHINE') {
 										reportName: "TestResultsSandwichReport"
 										])
 		}
+		if (currentBuild.currentResult == 'SUCCESS') {
+            echo "EMAILING TEST RESULTS"
+            emailext (attachmentsPattern: "**/Automation_Test_Results.html", body: """Hi All, \n \n Please find the Test Automation Results. To view the test results, please click the link provided below. \n \n Jenkins logs also attached for reference. \n \n Build URL: ${BUILD_URL} \n \n Test Automation Results : ${BUILD_URL}TestResultsSandwichReport \n \n Thanks & Regards, \n \n Jenkins Admin""", subject: "CI - Test Automation Results (Jenkins Build: ${env.JOB_NAME} ${currentBuild.displayName})", to: MAILING_LIST_TEST_RESULTS, attachLog: true)
+		}
+		
     }
 }
 
-def notifyFailed() {
+def notifyCopyArtefactFailed() {
     def MAILING_LIST_JOB_STATUS = "sachin.gupta@toshiba-tsip.com"
-    mail to: MAILING_LIST_JOB_STATUS, subject:"FAILED!!! Automation CI (Jenkins Build: ${env.JOB_NAME} ${currentBuild.displayName})", body: "Hi All, \n \nAutomation CI job failed in Jenkins Server.\n \n \nBuild URL: ${BUILD_URL} \n \n \nThe failure may be due to the following reasons: \n 1. Jenkins pipeline script is unable to execute some steps \n 2. Deployment script failed to execute some tasks \n 3. Receiver build is failed at Jenkins Server \n 4. The Test Server is not available \n \n \nThanks & Regards, \n Landing-Zone CI Admin"
+    mail to: MAILING_LIST_JOB_STATUS, subject:"BUILD FAILED!!! Automation CI (Build: ${env.JOB_NAME} ${currentBuild.displayName})", body: "Hi All, \n \n CI job failed in Jenkins Server.\n \n REASON : Copying artefacts to test machine failed. \n \n Build URL: ${BUILD_URL} \n \n \nThe failure may be due to the following reasons: \n 1. Check test Machine is accessible. \n 2. Shared folder is available in test machine. \n \n Thanks & Regards, \n Jenkins Admin"
+}
+
+def notifyDeployArtefactFailed() {
+    def MAILING_LIST_JOB_STATUS = "sachin.gupta@toshiba-tsip.com"
+    mail to: MAILING_LIST_JOB_STATUS, subject:"BUILD FAILED!!! Automation CI (Build: ${env.JOB_NAME} ${currentBuild.displayName})", body: "Hi All, \n \n CI job failed in Jenkins Server.\n \n REASON : Deploying artefacts to test machine failed. \n \n Build URL: ${BUILD_URL} \n \n \nThe failure may be due to the following reasons: \n 1. Check test Machine is accessible. \n 2. Shared folder is available in test machine. \n \n Thanks & Regards, \n Jenkins Admin"
 }
