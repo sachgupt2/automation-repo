@@ -29,7 +29,7 @@ node {
  def RESTART_CMD = "shutdown -r -f"
  def TEST_MACHINE_AUTOMATION_DIR = "C:\\${TEST_MACHINE_SHARED_DIR}\\Automation"
  def TEST_MACHINE_AUTOMATION_REPORT_DIR = "Execution-Report"
-
+ def AUTOMATION_REPORT_NAME = "Automation-Execution-Report"
 stage('RESTART_TEST_MACHINE') {
 try{
      echo "Restarting Machine ${TEST_MACHINE_IP}"
@@ -230,12 +230,12 @@ stage('COPY_ARTEFACTS_TO_TEST_MACHINE') {
 										keepAll: true,
 										reportDir: "Cucumber-Tests-Packaging\\target\\Execution-Report\\cucumber-html-reports\\cucumber-html-reports",
 										reportFiles: "overview-features.html",
-										reportName: "TestResultsSandwichReport"
+										reportName: "${AUTOMATION_REPORT_NAME}"
 										])
 		}
 		if (currentBuild.currentResult == 'SUCCESS') {
             echo "EMAILING TEST RESULTS"
-            emailext (attachmentsPattern: "**/Automation_Test_Results.html", body: """Hi All, \n \n Please find the Test Automation Results. To view the test results, please click the link provided below. \n \n Jenkins logs also attached for reference. \n \n Build URL: ${BUILD_URL} \n \n Test Automation Results : ${BUILD_URL}TestResultsSandwichReport \n \n Thanks & Regards, \n \n Jenkins Admin""", subject: "CI - Test Automation Results (Jenkins Build: ${env.JOB_NAME} ${currentBuild.displayName})", to: MAILING_LIST_TEST_RESULTS, attachLog: true)
+            emailext (attachmentsPattern: "**/Automation_Test_Results.html", body: """Hi All, \n \n Please find the Test Automation Results. To view the test results, please click the link provided below. \n \n Jenkins logs also attached for reference. \n \n Build URL: ${BUILD_URL} \n \n Test Automation Results : ${BUILD_URL}${AUTOMATION_REPORT_NAME} \n \n Thanks & Regards, \n \n Jenkins Admin""", subject: "CI - Test Automation Results (Jenkins Build: ${env.JOB_NAME} ${currentBuild.displayName})", to: MAILING_LIST_TEST_RESULTS, attachLog: true)
 		}
 		
     }
