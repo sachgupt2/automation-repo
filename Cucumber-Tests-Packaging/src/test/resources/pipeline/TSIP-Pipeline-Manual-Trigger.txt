@@ -5,7 +5,7 @@ properties([
 ])
 
 node {
- def MAILING_LIST_TEST_RESULTS = "sachin.gupta@toshiba-tsip.com"
+ def MAILING_LIST_TEST_RESULTS = "sachin.gupta@toshiba-tsip.com,Sudharsan.Nareddy@toshiba-tsip.com,Rahul.Gupta@toshiba-tsip.com,Kaarthikeyan.Lokanathan@toshiba-tsip.com,Sagar.Bhandare@toshiba-tsip.com,Venkata.Vallabhaneni@toshiba-tsip.com,Megha.Sakrikar@toshiba-tsip.com"
  def SPRING_CLOUD_DIR = "SpringloudContract"
  def STUB_RUNNER_DIR = "StubServer"
  def CUCUMBER_AUTOMATION_DIR = "Cucumber"
@@ -71,7 +71,15 @@ stage('CHECKOUT_SPRING_CLOUD_PROJECT') {
   echo "CHECKING OUT SPRING CLOUD CONTRACT PROJECT"  
   dir(SPRING_CLOUD_DIR)
      {
-          git branch: "${GIT_BRANCH}", credentialsId: "${GIT_CREDENTIAL}", url: "${GIT_SPRING_CLOUD_URL}"
+          //git branch: "${GIT_BRANCH}", credentialsId: "${GIT_CREDENTIAL}", url: "${GIT_SPRING_CLOUD_URL}" poll: 'true'
+		checkout([
+        $class: 'GitSCM', 
+        branches: [[name: '*/master']], 
+        doGenerateSubmoduleConfigurations: false, 
+        extensions: [[$class: 'CleanCheckout']], 
+        submoduleCfg: [], 
+        userRemoteConfigs: [[credentialsId: "${GIT_CREDENTIAL}", url: "${GIT_SPRING_CLOUD_URL}"]]
+		])
 	 }
   }
 
@@ -79,14 +87,38 @@ stage('CHECKOUT_STUB_RUNNER_PROJECT') {
   echo "CHECKING OUT STUB RUNNER PROJECT"
   dir(STUB_RUNNER_DIR)
      {
-           git branch: "${GIT_BRANCH}", credentialsId: "${GIT_CREDENTIAL}", url: "${GIT_STUB_RUNNER_URL}"
+           //git branch: "${GIT_BRANCH}", credentialsId: "${GIT_CREDENTIAL}", url: "${GIT_STUB_RUNNER_URL}"
+		checkout(
+		poll:false,
+		changelog:false,
+		scm:[
+		$class: 'GitSCM', 
+        branches: [[name: '*/master']], 
+        doGenerateSubmoduleConfigurations: false, 
+		extensions: [[$class: 'DisableRemotePoll']],
+        extensions: [[$class: 'CleanCheckout']], 
+        submoduleCfg: [], 
+        userRemoteConfigs: [[credentialsId: "${GIT_CREDENTIAL}", url: "${GIT_STUB_RUNNER_URL}"]]
+		])
 	 }
   }
 stage('CHECKOUT_CUCUMBER_PROJECT') {
   echo "CHECKING OUT CUCUMBER PROJECT"
   dir(CUCUMBER_AUTOMATION_DIR)
      {
-           git branch: "${GIT_BRANCH}", credentialsId: "${GIT_CREDENTIAL}", url: "${GIT_CUCUMBER_URL}"
+           //git branch: "${GIT_BRANCH}", credentialsId: "${GIT_CREDENTIAL}", url: "${GIT_CUCUMBER_URL}"
+		checkout(
+		poll:false,
+		changelog:false,
+		scm:[
+		$class: 'GitSCM', 
+        branches: [[name: '*/master']], 
+        doGenerateSubmoduleConfigurations: false,
+		extensions: [[$class: 'DisableRemotePoll']],		
+        extensions: [[$class: 'CleanCheckout']], 
+        submoduleCfg: [], 
+        userRemoteConfigs: [[credentialsId: "${GIT_CREDENTIAL}", url: "${GIT_CUCUMBER_URL}"]]
+		])
 	 }
   }
   
@@ -242,11 +274,11 @@ stage('COPY_ARTEFACTS_TO_TEST_MACHINE') {
 }
 
 def notifyCopyArtefactFailed() {
-    def MAILING_LIST_JOB_STATUS = "sachin.gupta@toshiba-tsip.com"
+    def MAILING_LIST_JOB_STATUS = "sachin.gupta@toshiba-tsip.com,Sudharsan.Nareddy@toshiba-tsip.com,Rahul.Gupta@toshiba-tsip.com,Kaarthikeyan.Lokanathan@toshiba-tsip.com,Sagar.Bhandare@toshiba-tsip.com,Venkata.Vallabhaneni@toshiba-tsip.com,Megha.Sakrikar@toshiba-tsip.com"
     mail to: MAILING_LIST_JOB_STATUS, subject:"BUILD FAILED!!! Automation CI (Build: ${env.JOB_NAME} ${currentBuild.displayName})", body: "Hi All, \n \n CI job failed in Jenkins Server.\n \n REASON : Copying artefacts to test machine failed. \n \n Build URL: ${BUILD_URL} \n \n \nThe failure may be due to the following reasons: \n 1. Check test Machine is accessible. \n 2. Shared folder is available in test machine. \n \n Thanks & Regards, \n Jenkins Admin"
 }
 
 def notifyDeployArtefactFailed() {
-    def MAILING_LIST_JOB_STATUS = "sachin.gupta@toshiba-tsip.com"
+    def MAILING_LIST_JOB_STATUS = "sachin.gupta@toshiba-tsip.com,Sudharsan.Nareddy@toshiba-tsip.com,Rahul.Gupta@toshiba-tsip.com,Kaarthikeyan.Lokanathan@toshiba-tsip.com,Sagar.Bhandare@toshiba-tsip.com,Venkata.Vallabhaneni@toshiba-tsip.com,Megha.Sakrikar@toshiba-tsip.com"
     mail to: MAILING_LIST_JOB_STATUS, subject:"BUILD FAILED!!! Automation CI (Build: ${env.JOB_NAME} ${currentBuild.displayName})", body: "Hi All, \n \n CI job failed in Jenkins Server.\n \n REASON : Deploying artefacts to test machine failed. \n \n Build URL: ${BUILD_URL} \n \n \nThe failure may be due to the following reasons: \n 1. Check test Machine is accessible. \n 2. Shared folder is available in test machine. \n \n Thanks & Regards, \n Jenkins Admin"
 }
